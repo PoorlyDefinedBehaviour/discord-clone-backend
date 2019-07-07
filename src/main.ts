@@ -1,7 +1,7 @@
-import * as hapi from "@hapi/hapi";
+import * as hapi from "hapi";
 
 async function main(): Promise<void> {
-  const server: any = hapi.server({
+  const server: hapi.Server = new hapi.Server({
     port: process.env.PORT || 3000,
     host: process.env.HOST || "localhost"
   });
