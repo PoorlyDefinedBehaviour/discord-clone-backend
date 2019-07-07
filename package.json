@@ -18,6 +18,7 @@
   "dependencies": {
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
+    "express-graphql": "^0.8.0",
     "graphql": "^14.4.2",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.18"
