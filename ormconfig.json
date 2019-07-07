@@ -1,19 +1,40 @@
-{
-  "type": "mongodb",
-  "host": "localhost",
-  "port": 3306,
-  "username": "steakroastdev",
-  "password": "steakroastdev",
-  "database": "steakroastdev",
-  "synchronize": true,
-  "logging": true,
-  "entities": ["src/database/entity/**/*.ts"],
-  "migrations": ["src/database/migration/**/*.ts"],
-  "subscribers": ["src/database/subscriber/**/*.ts"],
-  "migrationsRun": false,
-  "cli": {
-    "entitiesDir": "src/database/entity",
-    "migrationsDir": "src/database/migration",
-    "subscribersDir": "src/database/subscriber"
+[
+  {
+    "type": "mongodb",
+    "name": "dev",
+    "host": "localhost",
+    "port": 27017,
+    "database": "steakroastdev",
+    "synchronize": true,
+    "logging": true,
+    "dropSchema": false,
+    "entities": ["src/database/entity/**/*.ts"],
+    "migrations": ["src/database/migration/**/*.ts"],
+    "subscribers": ["src/database/subscriber/**/*.ts"],
+    "migrationsRun": false,
+    "cli": {
+      "entitiesDir": "src/database/entity",
+      "migrationsDir": "src/database/migration",
+      "subscribersDir": "src/database/subscriber"
+    }
+  },
+  {
+    "type": "mongodb",
+    "name": "test",
+    "host": "localhost",
+    "port": 27017,
+    "database": "stackroasttest",
+    "synchronize": true,
+    "logging": true,
+    "dropSchema": true,
+    "entities": ["src/database/entity/**/*.ts"],
+    "migrations": ["src/database/migration/**/*.ts"],
+    "subscribers": ["src/database/subscriber/**/*.ts"],
+    "migrationsRun": false,
+    "cli": {
+      "entitiesDir": "src/database/entity",
+      "migrationsDir": "src/database/migration",
+      "subscribersDir": "src/database/subscriber"
+    }
   }
-}
+]
