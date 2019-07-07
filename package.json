@@ -8,7 +8,7 @@
     "dev": "ts-node-dev --inspect -- src/main.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "PoorlyDefinedBehaviour",
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.0",
@@ -20,6 +20,7 @@
     "express": "^4.17.1",
     "express-graphql": "^0.8.0",
     "graphql": "^14.4.2",
+    "graphql-tag": "^2.10.1",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.18"
   }
