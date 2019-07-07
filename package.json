@@ -16,11 +16,13 @@
     "ts-node-dev": "^1.0.0-pre.40"
   },
   "dependencies": {
+    "@types/mongodb": "^3.1.28",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "express-graphql": "^0.8.0",
     "graphql": "^14.4.2",
     "graphql-tag": "^2.10.1",
+    "mongodb": "^3.2.7",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.18"
   }
