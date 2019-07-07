@@ -26,12 +26,14 @@
     "typescript": "3.3.3333"
   },
   "dependencies": {
+    "@types/express-graphql": "^0.8.0",
     "@types/mongodb": "^3.1.28",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "express-graphql": "^0.8.0",
     "graphql": "^14.4.2",
     "graphql-tag": "^2.10.1",
+    "graphql-tools": "^4.0.5",
     "mongodb": "^3.2.7",
     "reflect-metadata": "^0.1.10",
     "typeorm": "0.2.18"
