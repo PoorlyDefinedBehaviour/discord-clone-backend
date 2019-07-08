@@ -1,16 +1,29 @@
-import { Entity, Column, ObjectIdColumn } from "typeorm";
+import {
+  Entity,
+  Column,
+  ObjectIdColumn,
+  BeforeInsert,
+  BaseEntity
+} from "typeorm";
+
+import { hash } from "bcryptjs";
 
 @Entity()
-export class User {
+export default class User extends BaseEntity {
   @ObjectIdColumn()
   id: number;
 
   @Column()
-  username: string;
+  email: string;
 
   @Column()
   password: string;
 
   @Column()
   domain: string;
+
+  @BeforeInsert()
+  async hash_password() {
+    this.password = await hash(this.password, 10);
+  }
 }
