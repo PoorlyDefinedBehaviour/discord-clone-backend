@@ -11,12 +11,6 @@ export default {
       _: any,
       { email, password }: GQL.IRegisterOnMutationArguments
     ) => {
-      /*
-      await User.create({
-        email,
-        password
-      });
-      */
       const user = new User();
       user.email = email;
       user.password = password;
