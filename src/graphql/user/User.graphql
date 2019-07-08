@@ -9,6 +9,12 @@ type User {
   domain: String
 }
 
+type Error {
+  status: Int!
+  path: String
+  message: String!
+}
+
 type Mutation {
-  register(email: String!, password: String!): User
+  register(email: String!, password: String!): [Error!]
 }
