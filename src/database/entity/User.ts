@@ -13,7 +13,7 @@ export default class User extends BaseEntity {
   @ObjectIdColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
@@ -25,5 +25,11 @@ export default class User extends BaseEntity {
   @BeforeInsert()
   async hash_password() {
     this.password = await hash(this.password, 10);
+  }
+
+  constructor(email: string, password: string) {
+    super();
+    this.email = email;
+    this.password = password;
   }
 }
