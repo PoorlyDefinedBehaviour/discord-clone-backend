@@ -40,6 +40,7 @@
     "graphql": "^14.4.2",
     "graphql-import": "^0.7.1",
     "graphql-tools": "^4.0.5",
+    "merge-graphql-schemas": "^1.5.8",
     "mongodb": "^3.2.7",
     "reflect-metadata": "^0.1.10",
     "typeorm": "0.2.18"
