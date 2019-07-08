@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --inspect -- src/main.ts",
     "start": "ts-node src/main.ts",
+    "gen-schema-types": "gql2ts src/graphql/**/*.graphql -o src/types/graphql.d.ts",
     "typeorm-migration-generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -n MigrationName",
     "typeorm-migration-run": "ts-node ./node_modules/typeorm/cli.js migration:run",
     "typeorm-migration-revert": "ts-node ./node_modules/typeorm/cli.js migration:revert"
@@ -29,11 +30,13 @@
   },
   "dependencies": {
     "@types/express-graphql": "^0.8.0",
+    "@types/glob": "^7.1.1",
     "@types/mongodb": "^3.1.28",
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "express-graphql": "^0.8.0",
+    "glob": "^7.1.4",
     "graphql": "^14.4.2",
     "graphql-import": "^0.7.1",
     "graphql-tools": "^4.0.5",
