@@ -1,22 +1,32 @@
 import { createConnection, Connection, getConnectionOptions } from "typeorm";
+import Maybe from "graphql/tsutils/Maybe";
+
+let connection: Maybe<Connection> = null;
 
 export default async (): Promise<Connection> => {
   const env: string = process.env.ENVIRONMENT as string;
-  console.log("env", env);
-  if (env === "DEV") {
-    return await createConnection(await getConnectionOptions("dev"));
+
+  console.log(`Creating ${env} connection...`);
+
+  if (connection) {
+    return connection;
   }
 
-  if (env === "TEST") {
-    return await createConnection(await getConnectionOptions("test"));
+  if (/dev/gi.test(env)) {
+    connection = await createConnection(await getConnectionOptions("dev"));
   }
 
-  if (env === "PROD") {
-    return await createConnection({
+  if (/test/gi.test(env)) {
+    connection = await createConnection(await getConnectionOptions("test"));
+  }
+
+  if (/prod/gi.test(env)) {
+    connection = await createConnection({
       type: "mongodb",
       useNewUrlParser: true,
       url: process.env.MONGODB_URL,
-      database: "steakroastdev"
+      database: "steakroastdev",
+      synchronize: false
     });
   }
 
