@@ -4,12 +4,14 @@ import { importSchema } from "graphql-import";
 import { sync } from "glob";
 
 export default () => {
-  const types: any = sync(`${__dirname}/**/*.graphql`).map((file: string) =>
-    importSchema(file)
-  );
+  const types: any = sync(`${__dirname}/**/*.graphql`)
+    .filter((file: string) => !/.test./gi.test(file))
+    .map((file: string) => importSchema(file));
 
   const resolvers = sync(`${__dirname}/**/*.?s`)
-    .filter((file: string) => !/GenerateSchema/gi.test(file))
+    .filter(
+      (file: string) => !/GenerateSchema/gi.test(file) && !/.test./gi.test(file)
+    )
     .map((file: string) => require(file).default);
 
   return makeExecutableSchema({
