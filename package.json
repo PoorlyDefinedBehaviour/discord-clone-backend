@@ -23,6 +23,7 @@
     "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.0",
     "@types/node": "^8.0.29",
+    "@types/yup": "^0.26.20",
     "gql2ts": "^1.10.1",
     "ts-node": "3.3.0",
     "ts-node-dev": "^1.0.0-pre.40",
@@ -43,6 +44,7 @@
     "merge-graphql-schemas": "^1.5.8",
     "mongodb": "^3.2.7",
     "reflect-metadata": "^0.1.10",
-    "typeorm": "0.2.18"
+    "typeorm": "0.2.18",
+    "yup": "^0.27.0"
   }
 }
