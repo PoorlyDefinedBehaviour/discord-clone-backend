@@ -9,13 +9,10 @@ export default () => {
     .map((file: string) => importSchema(file));
 
   const resolvers = sync(`${__dirname}/**/*.?s`)
-    .filter(
-      (file: string) =>
-        !/GenerateSchema/gi.test(file) &&
-        !/\.test\./gi.test(file) &&
-        !/index\.ts/gi.test(file)
-    )
+    .filter((file: string) => /^Resolvers$/.test(file))
     .map((file: string) => require(file).default);
+
+  console.log("resolvers", resolvers);
 
   return makeExecutableSchema({
     typeDefs: mergeTypes(types),
