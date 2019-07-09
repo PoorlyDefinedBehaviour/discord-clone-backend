@@ -10,7 +10,10 @@ export default () => {
 
   const resolvers = sync(`${__dirname}/**/*.?s`)
     .filter(
-      (file: string) => !/GenerateSchema/gi.test(file) && !/.test./gi.test(file)
+      (file: string) =>
+        !/GenerateSchema/gi.test(file) &&
+        !/\.test\./gi.test(file) &&
+        !/index\.ts/gi.test(file)
     )
     .map((file: string) => require(file).default);
 
