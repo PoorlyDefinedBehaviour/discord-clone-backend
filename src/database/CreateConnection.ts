@@ -3,14 +3,14 @@ import Maybe from "graphql/tsutils/Maybe";
 
 let connection: Maybe<Connection> = null;
 
-export default async (): Promise<Connection> => {
+export default async (): Promise<Maybe<Connection>> => {
   const env: string = process.env.ENVIRONMENT as string;
-
-  console.log(`Creating ${env} connection...`);
 
   if (connection) {
     return connection;
   }
+
+  console.log(`Creating ${env} connection...`);
 
   if (/dev/gi.test(env)) {
     connection = await createConnection(await getConnectionOptions("dev"));
@@ -30,5 +30,5 @@ export default async (): Promise<Connection> => {
     });
   }
 
-  return {} as Connection;
+  return connection;
 };
