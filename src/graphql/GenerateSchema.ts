@@ -9,10 +9,8 @@ export default () => {
     .map((file: string) => importSchema(file));
 
   const resolvers = sync(`${__dirname}/**/*.?s`)
-    .filter((file: string) => /^Resolvers$/.test(file))
+    .filter((file: string) => /Resolvers.ts/gi.test(file))
     .map((file: string) => require(file).default);
-
-  console.log("resolvers", resolvers);
 
   return makeExecutableSchema({
     typeDefs: mergeTypes(types),
