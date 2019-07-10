@@ -50,7 +50,6 @@ export default {
         })
         .catch((error: any) => null);
 
-      console.log("user", user);
       if (!user) {
         return {
           status: 404,
@@ -61,6 +60,30 @@ export default {
       delete user.password;
 
       return { status: 200, user };
+    },
+    users: async (_: any, { page = 0 }: GQL.IUsersOnQueryArguments) => {
+      try {
+        const connection: Maybe<Connection> = await create_connection();
+
+        if (!connection) {
+          return {
+            status: 500,
+            errors: [InternalServerError]
+          };
+        }
+
+        const users: Maybe<Array<User>> = await connection.mongoManager
+          .find(User, { skip: (page as number) * 20, take: 20 })
+          .catch((error: any) => null);
+
+        return { status: 200, users, page };
+      } catch (error) {
+        console.error(error);
+        return {
+          status: 500,
+          errors: [InternalServerError]
+        };
+      }
     }
   },
   Mutation: {
@@ -74,7 +97,7 @@ export default {
           { abortEarly: false }
         );
       } catch (error) {
-        return FormatYupError(error);
+        return { status: 422, errors: FormatYupError(error) };
       }
 
       try {

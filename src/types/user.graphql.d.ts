@@ -22,37 +22,54 @@ column: number;
 
 interface IQuery {
 __typename: "Query";
-user: IUser | null;
+user: IResponse;
+users: IMultipleUsersResponse;
 }
 
 interface IUserOnQueryArguments {
-id?: string | null;
+_id?: string | null;
 }
 
-interface IUser {
-__typename: "User";
-id: string;
-email: string;
-email_confirmed: boolean | null;
-password: string;
-domain: string | null;
-}
-
-interface IMutation {
-__typename: "Mutation";
-register: Array<IResponse> | null;
-}
-
-interface IRegisterOnMutationArguments {
-email: string;
-password: string;
+interface IUsersOnQueryArguments {
+page?: number | null;
 }
 
 interface IResponse {
 __typename: "Response";
 status: number;
+errors: Array<IError | null> | null;
+user: IUser | null;
+}
+
+interface IError {
+__typename: "Error";
 path: string | null;
-message: string;
+message: string | null;
+}
+
+interface IUser {
+__typename: "User";
+_id: string;
+email: string;
+email_confirmed: boolean;
+domain: string | null;
+}
+
+interface IMultipleUsersResponse {
+__typename: "MultipleUsersResponse";
+status: number;
+errors: Array<IError | null> | null;
+users: Array<IUser | null> | null;
+}
+
+interface IMutation {
+__typename: "Mutation";
+register: IResponse;
+}
+
+interface IRegisterOnMutationArguments {
+email: string;
+password: string;
 }
 }
 

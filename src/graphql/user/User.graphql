@@ -10,16 +10,24 @@ type Error {
   message: String
 }
 
-type Response {
+type SingleUserResponse {
   status: Int!
   errors: [Error]
   user: User
 }
 
+type MultipleUsersResponse {
+  status: Int!
+  page: Int
+  errors: [Error]
+  users: [User]
+}
+
 type Query {
-  user(_id: String): Response!
+  user(_id: String): SingleUserResponse!
+  users(page: Int): MultipleUsersResponse!
 }
 
 type Mutation {
-  register(email: String!, password: String!): Response!
+  register(email: String!, password: String!): SingleUserResponse!
 }
