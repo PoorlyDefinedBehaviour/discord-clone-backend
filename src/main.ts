@@ -13,11 +13,20 @@ import GenerateSchema from "./graphql/GenerateSchema";
 import db_connection from "./database/CreateConnectionIfNotConnected";
 import { Maybe } from "./types/maybe";
 
+import ExpressRateLimit from "express-rate-limit";
+
 async function main(): Promise<void> {
   const app: Express = express();
 
   app.use(express.json());
   app.use(cors());
+
+  app.use(
+    new ExpressRateLimit({
+      windowMs: 60 * 1000, // 1 minute
+      max: 100 // limit each IP to 100 requests per windowMs
+    })
+  );
 
   app.use(
     GraphQLHTTP({
@@ -27,7 +36,9 @@ async function main(): Promise<void> {
   );
 
   // @ts-ignore
-  const server: any = await app.listen(process.env.PORT || 3000);
+  const server: any = await app.listen(
+    ((process.env.PORT as any) as number) || 3000
+  );
   console.log(`Server running on port ${process.env.PORT || 3000}`);
 
   const connection: Maybe<Connection> = await db_connection();
