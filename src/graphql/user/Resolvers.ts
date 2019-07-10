@@ -1,7 +1,7 @@
 import * as yup from "yup";
 import { FormatYupError } from "../../utils/FormatYupError";
 import User from "../../database/entity/User";
-import create_connection from "../../database/CreateConnection";
+import create_connection from "../../database/CreateConnectionIfNotConnected";
 import { Maybe } from "../../types/maybe";
 import { Connection } from "typeorm";
 import { ObjectID } from "mongodb";
@@ -9,7 +9,6 @@ import { ObjectID } from "mongodb";
 import {
   InternalServerError,
   EmailAlreadyInUse,
-  UserCreated,
   InvalidUserId,
   UserNotFound
 } from "../responses";
@@ -30,13 +29,19 @@ export default {
   Query: {
     user: async (_: any, { _id }: any) => {
       if (!_id) {
-        return InvalidUserId;
+        return {
+          status: 422,
+          errors: [InvalidUserId]
+        };
       }
 
       const connection: Maybe<Connection> = await create_connection();
 
       if (!connection) {
-        return InternalServerError;
+        return {
+          status: 500,
+          errors: [InternalServerError]
+        };
       }
 
       const user: Maybe<User> = await connection.mongoManager
@@ -47,7 +52,10 @@ export default {
 
       console.log("user", user);
       if (!user) {
-        return UserNotFound;
+        return {
+          status: 404,
+          errors: [UserNotFound]
+        };
       }
 
       delete user.password;
@@ -73,18 +81,23 @@ export default {
         const connection: Maybe<Connection> = await create_connection();
 
         if (!connection) {
-          return [InternalServerError];
+          return {
+            status: 500,
+            errors: [InternalServerError]
+          };
         }
 
         if (await connection.mongoManager.findOne(User, { email })) {
-          return [EmailAlreadyInUse];
+          return { status: 422, errors: [EmailAlreadyInUse] };
         }
 
-        await connection.mongoManager.save(new User(email, password));
-        return [UserCreated];
+        const user: any = await connection.mongoManager.save(
+          new User(email, password)
+        );
+        return { status: 201, user };
       } catch (error) {
         console.error(error);
-        return [InternalServerError];
+        return { status: 500, errors: [InternalServerError] };
       }
     }
   }

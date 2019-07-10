@@ -1,20 +1,25 @@
-type Query {
-  hello(name: String): String!
-}
-
 type User {
-  id: String!
+  _id: String!
   email: String!
-  password: String!
+  email_confirmed: Boolean!
   domain: String
 }
 
 type Error {
-  status: Int!
   path: String
-  message: String!
+  message: String
+}
+
+type Response {
+  status: Int!
+  errors: [Error]
+  user: User
+}
+
+type Query {
+  user(_id: String): Response!
 }
 
 type Mutation {
-  register(email: String!, password: String!): [Error!]
+  register(email: String!, password: String!): Response!
 }
