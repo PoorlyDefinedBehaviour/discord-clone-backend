@@ -1,33 +1,50 @@
-type User {
-  _id: String!
-  email: String!
-  email_confirmed: Boolean!
-  domain: String
+type User_Server {
+  name: String!
+  owner: User_User!
+  logo: String!
+  staff: [User_User]
+  members: [User_User]
 }
 
-type Error {
+type User_User {
+  _id: String!
+  username: String!
+  email: String!
+  avatar: String!
+  friends: [User_User]
+  friend_requests: [User_User]
+  servers: [User_Server]
+}
+
+type User_Error {
   path: String
   message: String
 }
 
-type SingleUserResponse {
+type User_SingleResponse {
   status: Int!
-  errors: [Error]
-  user: User
+  errors: [User_Error]
+  token: String
+  user: User_User
 }
 
-type MultipleUsersResponse {
+type User_MultipleResponse {
   status: Int!
   page: Int
-  errors: [Error]
-  users: [User]
+  errors: [User_Error]
+  users: [User_User]
 }
 
 type Query {
-  user(_id: String): SingleUserResponse!
-  users(page: Int): MultipleUsersResponse!
+  user(_id: String!): User_SingleResponse!
+  users(page: Int!): User_MultipleResponse!
 }
 
 type Mutation {
-  register(email: String!, password: String!): SingleUserResponse!
+  register(
+    username: String!
+    email: String!
+    password: String!
+  ): User_SingleResponse!
+  login(email: String!, password: String!): User_SingleResponse
 }

@@ -22,7 +22,7 @@ column: number;
 
 interface IQuery {
 __typename: "Query";
-user: IResponse;
+user: ISingleUserResponse;
 users: IMultipleUsersResponse;
 }
 
@@ -34,8 +34,8 @@ interface IUsersOnQueryArguments {
 page?: number | null;
 }
 
-interface IResponse {
-__typename: "Response";
+interface ISingleUserResponse {
+__typename: "SingleUserResponse";
 status: number;
 errors: Array<IError | null> | null;
 user: IUser | null;
@@ -50,24 +50,26 @@ message: string | null;
 interface IUser {
 __typename: "User";
 _id: string;
+username: string;
 email: string;
 email_confirmed: boolean;
-domain: string | null;
 }
 
 interface IMultipleUsersResponse {
 __typename: "MultipleUsersResponse";
 status: number;
+page: number | null;
 errors: Array<IError | null> | null;
 users: Array<IUser | null> | null;
 }
 
 interface IMutation {
 __typename: "Mutation";
-register: IResponse;
+register: ISingleUserResponse;
 }
 
 interface IRegisterOnMutationArguments {
+username: string;
 email: string;
 password: string;
 }

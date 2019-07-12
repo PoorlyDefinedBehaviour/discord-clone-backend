@@ -1,19 +1,26 @@
 import * as yup from "yup";
 import { FormatYupError } from "../../utils/FormatYupError";
-import User from "../../database/entity/User";
-import create_connection from "../../database/CreateConnectionIfNotConnected";
 import { Maybe } from "../../types/maybe";
-import { Connection } from "typeorm";
-import { ObjectID } from "mongodb";
+
+import { compare } from "bcryptjs";
+import { sign } from "jsonwebtoken";
+
+import { Server } from "../../database/models/Server";
+import { IUser, User } from "../../database/models/User";
 
 import {
   InternalServerError,
   EmailAlreadyInUse,
   InvalidUserId,
-  UserNotFound
+  UserNotFound,
+  InvalidCredentials
 } from "../responses";
 
 const RegisterSchema = yup.object().shape({
+  username: yup
+    .string()
+    .min(5, "Username must be at least 5 characters long")
+    .max(255),
   email: yup
     .string()
     .min(5, "Email must be at least 5 characters long")
@@ -35,53 +42,46 @@ export default {
         };
       }
 
-      const connection: Maybe<Connection> = await create_connection();
+      try {
+        const user = await User.findOne({ _id }, Server).select("-password");
 
-      if (!connection) {
+        if (!user) return { status: 404, errors: [UserNotFound] };
+
         return {
-          status: 500,
-          errors: [InternalServerError]
+          status: 200,
+          user
+        };
+      } catch (error) {
+        return {
+          status: 400,
+          errors: [
+            {
+              path: null,
+              message: "User not found"
+            }
+          ]
         };
       }
-
-      const user: Maybe<User> = await connection.mongoManager
-        .findOne(User, {
-          _id: new ObjectID(_id)
-        })
-        .catch((error: any) => null);
-
-      if (!user) {
-        return {
-          status: 404,
-          errors: [UserNotFound]
-        };
-      }
-
-      delete user.password;
-
-      return { status: 200, user };
     },
     users: async (_: any, { page = 0 }: GQL.IUsersOnQueryArguments) => {
       try {
-        const connection: Maybe<Connection> = await create_connection();
+        const { docs: users }: Maybe<any> = await (User as any).paginate(
+          {},
+          {
+            page,
+            limit: -20
+          }
+        );
 
-        if (!connection) {
-          return {
-            status: 500,
-            errors: [InternalServerError]
-          };
-        }
-
-        const users: Maybe<Array<User>> = await connection.mongoManager
-          .find(User, { skip: (page as number) * 20, take: 20 })
-          .catch((error: any) => null);
+        if (!users) return { status: 404, errors: [UserNotFound], page };
 
         return { status: 200, users, page };
       } catch (error) {
         console.error(error);
         return {
           status: 500,
-          errors: [InternalServerError]
+          errors: [InternalServerError],
+          page
         };
       }
     }
@@ -89,11 +89,11 @@ export default {
   Mutation: {
     register: async (
       _: any,
-      { email, password }: GQL.IRegisterOnMutationArguments
+      { username, email, password }: GQL.IRegisterOnMutationArguments
     ) => {
       try {
         await RegisterSchema.validate(
-          { email, password },
+          { username, email, password },
           { abortEarly: false }
         );
       } catch (error) {
@@ -101,23 +101,46 @@ export default {
       }
 
       try {
-        const connection: Maybe<Connection> = await create_connection();
-
-        if (!connection) {
-          return {
-            status: 500,
-            errors: [InternalServerError]
-          };
-        }
-
-        if (await connection.mongoManager.findOne(User, { email })) {
+        if (await User.findOne({ email }, Server)) {
           return { status: 422, errors: [EmailAlreadyInUse] };
         }
 
-        const user: any = await connection.mongoManager.save(
-          new User(email, password)
+        const user: IUser = await User.create({ username, email, password });
+
+        delete user.password;
+
+        return {
+          status: 201,
+          token: sign({ _id: user._id }, process.env.JWT_SECRET as string, {
+            expiresIn: "24h"
+          }),
+          user
+        };
+      } catch (error) {
+        console.error(error);
+        return { status: 500, errors: [InternalServerError] };
+      }
+    },
+    login: async (_: any, { email, password }: any) => {
+      try {
+        const user: Maybe<IUser> = await User.findOne({ email }, Server).select(
+          "password"
         );
-        return { status: 201, user };
+
+        if (!user) return { status: 401, errors: [InvalidCredentials] };
+
+        if (!(await compare(password, user.password)))
+          return { status: 401, errors: [InvalidCredentials] };
+
+        delete user.password;
+
+        return {
+          status: 200,
+          token: sign({ _id: user._id }, process.env.JWT_SECRET as string, {
+            expiresIn: "24h"
+          }),
+          user
+        };
       } catch (error) {
         console.error(error);
         return { status: 500, errors: [InternalServerError] };
