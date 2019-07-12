@@ -1,0 +1,44 @@
+type Server_Error {
+  path: String
+  message: String
+}
+
+type Server_User {
+  _id: String!
+  username: String!
+  email: String!
+  avatar: String!
+  friends: [Server_User]
+  friend_requests: [Server_User]
+  servers: [Server_Server]
+}
+
+type Server_Server {
+  _id: String!
+  name: String!
+  owner: Server_User!
+  logo: String!
+  staff: [Server_User]
+  members: [Server_User]
+}
+
+type Server_SingleResponse {
+  status: Int!
+  errors: [Server_Error]
+  server: Server_Server
+}
+
+type Server_MultipleResponse {
+  status: Int!
+  errors: [Server_Error]
+  servers: [Server_Server]
+}
+
+type Query {
+  server(_id: String!): Server_SingleResponse!
+  servers(page: Int!): Server_MultipleResponse!
+}
+
+type Mutation {
+  create_server(name: String!): Server_SingleResponse!
+}
