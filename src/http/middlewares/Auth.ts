@@ -7,7 +7,6 @@ export const TokenDecoder = async (
   bearer_token: string
 ): Promise<Maybe<any>> => {
   try {
-    console.log("token auth", bearer_token);
     const token = bearer_token.split(" ")[1];
     return await verify(token, process.env.JWT_SECRET as string);
   } catch (e) {

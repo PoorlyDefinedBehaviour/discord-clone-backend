@@ -3,11 +3,19 @@ import faker from "faker";
 import GraphQLEndPoint from "../GraphQLEndPoint";
 
 export const register_user = async (
-  username: string,
-  email: string,
-  password: string
-): Promise<AxiosResponse<any>> => {
-  const { data }: AxiosResponse<any> = await axios.post(GraphQLEndPoint, {
+  username?: string,
+  email?: string,
+  password?: string
+): Promise<any> => {
+  username || (username = faker.internet.userName());
+  email || (email = faker.internet.email());
+  password || (password = faker.internet.password());
+
+  const {
+    data: {
+      data: { register }
+    }
+  }: AxiosResponse<any> = await axios.post(GraphQLEndPoint, {
     query: `
       mutation {
         register(username: "${username}",email: "${email}", password: "${password}") {
@@ -21,38 +29,46 @@ export const register_user = async (
             _id
             username
             email
+            avatar
+            friends {
+              _id
+            username
+            email
+            avatar
+            }
+            servers {
+              _id
+              name
+              owner {
+                _id
+                username
+                email
+                avatar
+              }
+            }
+            createdAt
           }
         }
       }
     `
   });
 
-  return data;
+  return register;
 };
 
 describe("user test suite", () => {
-  beforeAll(() => faker.seed(Date.now()));
+  beforeAll(() => {
+    faker.seed(Date.now());
+  });
 
   test("register a user", async () => {
-    const {
-      data: {
-        register: { status }
-      }
-    }: AxiosResponse<any> = await register_user(
-      faker.internet.userName(),
-      faker.internet.email(),
-      faker.internet.password()
-    );
+    const { status }: AxiosResponse<any> = await register_user();
 
     expect(status).toBe(201);
   });
 
   test("invalid email", async () => {
-    const {
-      data: {
-        register: { status }
-      }
-    }: AxiosResponse<any> = await register_user(
+    const { status }: AxiosResponse<any> = await register_user(
       faker.internet.userName(),
       "abc",
       faker.internet.password()
@@ -62,11 +78,7 @@ describe("user test suite", () => {
   });
 
   test("invalid password", async () => {
-    const {
-      data: {
-        register: { status }
-      }
-    }: AxiosResponse<any> = await register_user(
+    const { status }: AxiosResponse<any> = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       "12345"
@@ -77,11 +89,7 @@ describe("user test suite", () => {
 
   test("login", async () => {
     const mock_password = faker.internet.password();
-    const {
-      data: {
-        register: { user: mock_user }
-      }
-    }: AxiosResponse<any> = await register_user(
+    const { user: mock_user }: any = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       mock_password
@@ -98,16 +106,6 @@ describe("user test suite", () => {
         mutation {
           login(email:"${mock_user.email}", password: "${mock_password}"){
             status
-            errors {
-              path
-              message
-            }
-            token
-            user{
-              _id
-              username
-              email
-            }
           }
         }
       `
@@ -117,11 +115,7 @@ describe("user test suite", () => {
   });
 
   test("fail to login with invalid credentials", async () => {
-    const {
-      data: {
-        register: { user: mock_user }
-      }
-    }: AxiosResponse<any> = await register_user(
+    const { user: mock_user }: any = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -159,11 +153,7 @@ describe("user test suite", () => {
   });
 
   test("query user by id", async () => {
-    const {
-      data: {
-        register: { user: mock_user }
-      }
-    }: any = await register_user(
+    const { user: mock_user }: any = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -179,51 +169,8 @@ describe("user test suite", () => {
       query: `
       {
         user(_id: "${mock_user._id}") {
-          status
-          errors {
-            path
-            message
-          }
-          token
           user {
             _id
-            username
-            email
-            avatar
-            friends {
-              _id
-              username
-              email
-              avatar
-            }
-            friend_requests {
-              _id
-              username
-              email
-              avatar
-            }
-            servers {
-              name
-              owner {
-                _id
-                username
-                email
-                avatar
-              }
-              logo
-              staff {
-                _id
-                username
-                email
-                avatar
-              }
-              members {
-                _id
-                username
-                email
-                avatar
-              }
-            }
           }
         }
       }
@@ -247,30 +194,21 @@ describe("user test suite", () => {
 
     const {
       data: {
-        data: {
-          users: { users: users_array }
-        }
+        data: { errors }
       }
-    }: AxiosResponse<any> = await axios.post(GraphQLEndPoint, {
+    }: any = await axios.post(GraphQLEndPoint, {
       query: `
       {
-        users(page: 0){
-          status
-          page 
+        users(page: 0) {
           errors {
-            path 
+            path
             message
-          }
-          users{
-            _id
-            username
-            email
           }
         }
       }
       `
     });
 
-    expect(users_array.length).toBeGreaterThanOrEqual(2);
+    expect(errors).toBeUndefined();
   });
 });
