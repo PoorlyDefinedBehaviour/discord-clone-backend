@@ -4,17 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env ENVIRONMENT=TEST jest --watch",
+    "test": "ts-node ./src/TestSetup.ts && jest --watch",
     "dev": "ts-node-dev --inspect -- src/main.ts",
-    "start": "ts-node src/main.ts",
-    "typeorm-migration-generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -n MigrationName",
-    "typeorm-migration-run": "ts-node ./node_modules/typeorm/cli.js migration:run",
-    "typeorm-migration-revert": "ts-node ./node_modules/typeorm/cli.js migration:revert"
+    "start": "ts-node src/main.ts"
   },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
+    "globalSetup": "./src/main.ts",
+    "globalTeardown": "./src/TestTearDown.ts",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",
@@ -49,14 +48,14 @@
     "@types/node": "^8.0.29",
     "@types/yup": "^0.26.20",
     "axios": "^0.19.0",
-    "cross-env": "^5.2.0",
     "faker": "^4.1.0",
     "gql2ts": "^1.10.1",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
     "ts-node": "3.3.0",
     "ts-node-dev": "^1.0.0-pre.40",
-    "typescript": "3.3.3333"
+    "typescript": "3.3.3333",
+    "win-node-env": "^0.4.0"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

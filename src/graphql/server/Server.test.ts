@@ -8,11 +8,7 @@ describe("server test suite", () => {
   beforeAll(async () => {
     faker.seed(Date.now());
 
-    const {
-      data: {
-        register: { token }
-      }
-    }: AxiosResponse<any> = await register_user(
+    const { token }: any = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -81,22 +77,7 @@ describe("server test suite", () => {
             message
           }
           server {
-            _id
-            name
-            owner {
-              _id
-              username
-              email
-              avatar
-            }
-            logo
-            staff {
-              _id
-              username
-              email
-              avatar
-            }
-            
+            _id  
           }
         }
       }
@@ -104,5 +85,27 @@ describe("server test suite", () => {
     });
 
     expect(_id as string).toEqual(server._id as string);
+  });
+
+  test("fail to query by invalid id", async () => {
+    const {
+      data: {
+        data: {
+          server: { status }
+        }
+      }
+    }: any = await axios.post(GraphQLEndPoint, {
+      query: `
+      {
+        server(_id: "${Date.now()
+          .toString()
+          .substr(0, 12)}") {
+          status
+        }
+      }
+      `
+    });
+
+    expect(status).toBe(404);
   });
 });

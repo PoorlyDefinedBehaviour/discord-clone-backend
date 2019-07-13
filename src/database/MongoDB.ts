@@ -6,11 +6,11 @@ Mongoose.plugin(MongoosePaginate);
 Mongoose.set("useCreateIndex", true);
 
 const connect = async (): Promise<void> => {
-  const env: string = process.env.ENVIRONMENT as string;
+  const env: string = (process.env.NODE_ENV as string) || "development";
 
-  console.log(`ENVIRONMENT=${env}`);
+  console.log(`NODE_ENV=${env}`);
 
-  if (/dev/gi.test(env)) {
+  if (/development/gi.test(env)) {
     await Mongoose.connect("mongodb://localhost/discord-backend-dev", {
       useCreateIndex: true,
       useNewUrlParser: true,

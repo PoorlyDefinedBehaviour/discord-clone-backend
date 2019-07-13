@@ -11,6 +11,8 @@ type Server_User {
   friends: [Server_User]
   friend_requests: [Server_User]
   servers: [Server_Server]
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Server_Server {
@@ -20,6 +22,8 @@ type Server_Server {
   logo: String!
   staff: [Server_User]
   members: [Server_User]
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Server_SingleResponse {

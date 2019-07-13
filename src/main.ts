@@ -2,6 +2,7 @@ import load from "process-env-loader";
 load();
 
 import express from "express";
+import { Server } from "http";
 import { Express } from "express-serve-static-core";
 import ExpressRateLimit from "express-rate-limit";
 import cors from "cors";
@@ -13,8 +14,11 @@ import GenerateSchema from "./graphql/GenerateSchema";
 
 // @ts-ignore
 import Mongoose from "./database/MongoDB";
+import { Maybe } from "./types/maybe";
 
-async function main(): Promise<void> {
+export let server: Maybe<Server>;
+
+export default async function main(): Promise<void> {
   const app: Express = express();
 
   app.use(express.json());
@@ -35,13 +39,10 @@ async function main(): Promise<void> {
     })
   );
 
-  // @ts-ignore
-  const server: express.Server = await app.listen(
-    ((process.env.PORT as any) as number) || 3000
-  );
+  server = await app.listen(((process.env.PORT as any) as number) || 3000);
   console.log(`Server running on port ${process.env.PORT || 3000}`);
 
   process.on("unhandledRejection", (error: any): void => console.error(error));
   process.on("uncaughtException", (error: any): void => console.error(error));
 }
-main();
+if (!/test/i.test(process.env.NODE_ENV as string)) main();

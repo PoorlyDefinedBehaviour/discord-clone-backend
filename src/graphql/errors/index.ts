@@ -18,6 +18,16 @@ export const UserNotFound = {
   message: "User not found"
 };
 
+export const FriendRequestAlreadySent = {
+  path: "send_friend_request",
+  message: "You've already sent a friend request to this user"
+};
+
+export const AlreadyFriend = {
+  path: "accept_friend_request",
+  message: "This user is in your friend list already"
+};
+
 export const EmailAlreadyInUse = {
   path: "email",
   message: "Email already in use"

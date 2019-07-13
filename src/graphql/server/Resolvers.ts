@@ -9,7 +9,7 @@ import {
   TokenRequired,
   InvalidServerId,
   ServerNotFound
-} from "../responses";
+} from "../errors";
 
 import pipe from "../../utils/Pipe";
 import Mongoose from "../../database/MongoDB";
