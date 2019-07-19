@@ -27,6 +27,7 @@ export const TokenValidator = async (
     /**
      * Keep the flow going and let graphql resolver decide what to do
      */
+    console.log("auth", e);
     return next();
   }
 };

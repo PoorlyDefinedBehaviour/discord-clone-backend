@@ -1,8 +1,8 @@
 type User_Server {
-  _id: String!
-  name: String!
-  owner: User_User!
-  logo: String!
+  _id: String
+  name: String
+  owner: User_User
+  logo: String
   staff: [User_User]
   members: [User_User]
   createdAt: String!
@@ -10,15 +10,15 @@ type User_Server {
 }
 
 type User_User {
-  _id: String!
-  username: String!
-  email: String!
-  avatar: String!
+  _id: String
+  username: String
+  email: String
+  avatar: String
   friends: [User_User]
   friend_requests: [User_User]
   servers: [User_Server]
-  createdAt: String!
-  updatedAt: String!
+  createdAt: String
+  updatedAt: String
 }
 
 type User_Error {

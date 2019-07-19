@@ -1,5 +1,5 @@
-import { Server, IServer } from "../../database/models/Server";
-import { IUser, User } from "../../database/models/User";
+import { Server } from "../../database/models/Server";
+import { User } from "../../database/models/User";
 
 import {
   InternalServerError,
@@ -11,38 +11,34 @@ import {
   ServerNotFound
 } from "../errors";
 
-import pipe from "../../utils/Pipe";
-import Mongoose from "../../database/MongoDB";
-import { Maybe } from "../../types/maybe";
-
 export default {
   Query: {
     server: async (_: any, { _id }: any) => {
       if (!_id) return { status: 400, errors: [InvalidServerId] };
 
-      const server: Maybe<IServer> = await Server.findOne({ _id })
-        .populate("staff owner members")
-        .catch((error: any) => null);
+      try {
+        const server: any = await Server.findOne({ _id }, User);
 
-      if (!server) return { status: 404, errors: [ServerNotFound] };
+        if (!server) {
+          return { status: 404, errors: [ServerNotFound] };
+        }
 
-      return { status: 200, server };
+        return { status: 200, server };
+      } catch (e) {
+        console.error("server", e);
+        return { status: 404, errors: [ServerNotFound] };
+      }
     },
     servers: async (_: any, { page = 0 }: any) => {
       try {
-        const { docs: servers }: Maybe<any> = await (Server as any)
-          .paginate(
-            {},
-            {
-              page,
-              limit: -20
-            }
-          )
-          .catch((error: any) => null);
-
-        if (!servers) return { status: 404, errors: [ServerNotFound] };
-
-        return { status: 200, page, servers };
+        return {
+          status: 200,
+          servers: await Server.find({})
+            .populate("members")
+            .populate("owner")
+            .skip(page * 20)
+            .limit(20)
+        };
       } catch (error) {
         console.error(error);
         return { status: 500, errors: [InternalServerError] };
@@ -58,35 +54,40 @@ export default {
       try {
         if (!_id) return { status: 401, errors: [TokenRequired] };
 
-        const user: Maybe<IUser> = await User.findOne({ _id }, Server);
+        const user: any = await User.findOne({ _id }, Server);
 
         if (!user) return { status: 401, errors: [UserNotFound] };
 
-        if (await Server.findOne({ name }, Server))
+        if (await Server.findOne({ name }, User))
           return { status: 400, errors: [ServerNameInUse] };
 
-        const server: IServer = await pipe(
-          (doc: IServer): IServer => {
-            doc.members.push(_id);
-            doc.staff.push(_id);
-            return doc;
-          },
-          async (doc: Mongoose.Document): Promise<Mongoose.Document> =>
-            await doc.populate("owner staff").execPopulate()
-        )(await Server.create({ name, owner: _id }));
+        let server: any = await Server.create({ name, owner: _id });
 
-        if (!server)
-          return {
-            status: 500,
-            errors: [InternalServerError, FailedToCreateServer]
-          };
+        server.members.push(_id);
+        server.staff.push(_id);
 
-        user.servers.push(server._id);
+        await Server.updateOne(
+          { _id: server._id },
+          { members: server.members, staff: server.staff }
+        );
+
+        await User.updateOne(
+          { _id },
+          { servers: [...user.servers, server._id] }
+        );
+
+        server = await Server.findOne({ _id: server._id }).populate({
+          path: "owner",
+          select: "-servers"
+        });
 
         return { status: 201, server };
       } catch (error) {
         console.error(error);
-        return { status: 500, errors: [InternalServerError] };
+        return {
+          status: 500,
+          errors: [InternalServerError, FailedToCreateServer]
+        };
       }
     }
   }

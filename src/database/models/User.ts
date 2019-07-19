@@ -74,16 +74,6 @@ UserSchema.pre("save", async function(
   next();
 });
 
-function populate(this: any, next: NextFunction): void {
-  this.populate("friends");
-  this.populate("friend_requests");
-  this.populate("servers");
-  next();
-}
-
-UserSchema.pre("findOne", populate);
-UserSchema.pre("find", populate);
-
 export interface IUser extends Mongoose.Document {
   username: string;
   email: string;

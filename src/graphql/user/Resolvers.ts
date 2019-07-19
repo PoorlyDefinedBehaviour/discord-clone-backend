@@ -52,15 +52,23 @@ export default {
       };
     },
     users: async (_: any, { page = 0 }: GQL.IUsersOnQueryArguments) => {
-      const users: Maybe<Array<IUser>> = await (User as any)
-        .find({}, Server)
-        .skip((page as number) * 20)
-        .limit(20)
-        .catch((error: any): any => null);
+      try {
+        const users: any = await User.find({}, Server)
+          .skip((page as number) * 20)
+          .limit(20)
+          .populate("friends")
+          .populate("friend_requests")
+          .populate("servers");
 
-      if (!users) return { status: 404, page, errors: [UserNotFound] };
-
-      return { status: 200, page, users };
+        return {
+          status: 200,
+          page,
+          users
+        };
+      } catch (e) {
+        console.error("users", e);
+        return { status: 500, errors: [InternalServerError] };
+      }
     }
   },
   Mutation: {
@@ -84,7 +92,7 @@ export default {
       if (user_already_exists)
         return { status: 422, errors: [EmailAlreadyInUse] };
 
-      const user: IUser = await User.create({
+      const user: Maybe<IUser> = await User.create({
         username,
         email,
         password
