@@ -2,9 +2,7 @@ import load from "process-env-loader";
 load();
 
 import express from "express";
-import { Server } from "http";
 import { Express } from "express-serve-static-core";
-import cors from "cors";
 
 import { TokenValidator } from "./http/middlewares/Auth";
 
@@ -15,14 +13,26 @@ import GenerateSchema from "./graphql/GenerateSchema";
 import Mongoose from "./database/MongoDB";
 import { Maybe } from "./types/maybe";
 
-export let server: Maybe<Server>;
+import RateLimit from "express-rate-limit";
+import Cors from "./http/middlewares/Cors";
+
+export let server: Maybe<any>;
+
+const app: Express = express();
+server = require("http").Server(app);
+const io: any = require("socket.io").listen(server, { secure: false });
 
 async function main(): Promise<void> {
-  const app: Express = express();
-
   app.use(express.json());
-  app.use(cors());
   app.use(TokenValidator);
+  app.use(Cors);
+
+  app.use(
+    new RateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 1000 // limit each IP to 100 requests per windowMs
+    })
+  );
 
   app.use(
     GraphQLHTTP({
@@ -31,8 +41,40 @@ async function main(): Promise<void> {
     })
   );
 
-  server = await app.listen(((process.env.PORT as any) as number) || 3000);
-  console.log(`Server running on port ${process.env.PORT || 3000}`);
+  io.on(
+    "connection",
+    (socket: any): void => {
+      console.log(`${socket.id} connected`);
+      socket.emit("test", "testdata");
+
+      socket.on("join", (room: string): void => socket.join(room));
+
+      socket.on(
+        "message",
+        (data: any): void => {
+
+          socket
+            .to(data.message.room)
+            .emit("message", { message: data.message });
+        }
+      );
+
+      socket.on(
+        "disconnect",
+        (): void => {
+          console.log("Client disconnected.");
+        }
+      );
+    }
+  );
+
+  server
+    .listen(
+      (process.env.PORT as any) as number,
+      process.env.HOST || "0.0.0.0",
+      () => console.log(` Listening on PORT ${process.env.PORT}`)
+    )
+    .on("error", (error: any): void => console.log(error));
 
   process.on("unhandledRejection", (error: any): void => console.error(error));
   process.on("uncaughtException", (error: any): void => console.error(error));

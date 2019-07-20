@@ -112,9 +112,11 @@ export default {
     },
     login: async (_: any, { email, password }: any) => {
       try {
-        const user: Maybe<IUser> = await User.findOne({ email }, Server).select(
-          "password"
-        );
+        const user: Maybe<IUser> = await User.findOne({ email }, Server)
+          .populate("servers")
+          .populate("friends")
+          .populate("friend_requests")
+          .select("password");
 
         if (!user) return { status: 401, errors: [InvalidCredentials] };
 

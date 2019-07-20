@@ -17,7 +17,10 @@ export default {
       if (!_id) return { status: 400, errors: [InvalidServerId] };
 
       try {
-        const server: any = await Server.findOne({ _id }, User);
+        const server: any = await Server.findOne({ _id }, User)
+          .populate("owner")
+          .populate("staff")
+          .populate("members");
 
         if (!server) {
           return { status: 404, errors: [ServerNotFound] };
@@ -66,15 +69,11 @@ export default {
         server.members.push(_id);
         server.staff.push(_id);
 
-        await Server.updateOne(
-          { _id: server._id },
-          { members: server.members, staff: server.staff }
-        );
+        await server.save();
 
-        await User.updateOne(
-          { _id },
-          { servers: [...user.servers, server._id] }
-        );
+        user.servers.push(server._id);
+
+        await user.save();
 
         server = await Server.findOne({ _id: server._id }).populate({
           path: "owner",
