@@ -8,7 +8,9 @@ import {
   ServerNameInUse,
   TokenRequired,
   InvalidServerId,
-  ServerNotFound
+  ServerNotFound,
+  AlreadyAServerMember,
+  NotAServerMember
 } from "../errors";
 
 export default {
@@ -87,6 +89,75 @@ export default {
           status: 500,
           errors: [InternalServerError, FailedToCreateServer]
         };
+      }
+    },
+    join_server: async (
+      _: any,
+      { _id }: any,
+      { token_payload: { _id: user_id } }: any
+    ) => {
+      try {
+        if (!user_id) return { status: 401, errors: [TokenRequired] };
+
+        const server: any = await Server.findOne({ _id }, User);
+        const user: any = await User.findOne({ _id: user_id }, Server);
+
+        if (server.members.includes(user._id)) {
+          return { status: 409, errors: [AlreadyAServerMember] };
+        }
+
+        server.members.push(user_id);
+        user.servers.push(_id);
+
+        await server.save();
+        await user.save();
+
+        return {
+          status: 201,
+          server: await Server.findOne({ _id }, User)
+            .populate("owner")
+            .populate("staff")
+            .populate("members")
+        };
+      } catch (e) {
+        console.error(e);
+        return { status: 500, errors: [ServerNotFound, InternalServerError] };
+      }
+    },
+    leave_server: async (
+      _: any,
+      { _id }: any,
+      { token_payload: { _id: user_id } }: any
+    ) => {
+      try {
+        if (!_id) return { status: 401, errors: [TokenRequired] };
+
+        const server: any = await Server.findOne({ _id }, User);
+        const user: any = await User.findOne({ _id: user_id }, Server);
+
+        if (!server.members.includes(user_id)) {
+          return { status: 409, errors: [NotAServerMember] };
+        }
+
+        server.members = server.members.filter(
+          (id: string): boolean => id != user_id
+        );
+
+        user.servers = user.servers.filter((id: string): boolean => id != _id);
+
+        await server.save();
+        await user.save();
+
+        return {
+          status: 201,
+          server: await Server.findOne({ _id }, User)
+            .populate("owner")
+            .populate("staff")
+            .populate("members")
+        };
+      } catch (e) {
+        console.error(e);
+        return { status: 500, errors: [ServerNotFound, InternalServerError] };
       }
     }
   }

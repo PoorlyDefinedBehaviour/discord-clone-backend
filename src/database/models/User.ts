@@ -5,6 +5,13 @@ import { NextFunction } from "express";
 
 const UserSchema = new Mongoose.Schema(
   {
+    active: {
+      type: Boolean,
+      required: false,
+      unique: false,
+      select: true,
+      default: true
+    },
     username: {
       type: String,
       required: true,
@@ -75,6 +82,7 @@ UserSchema.pre("save", async function(
 });
 
 export interface IUser extends Mongoose.Document {
+  active: boolean;
   username: string;
   email: string;
   password: string;

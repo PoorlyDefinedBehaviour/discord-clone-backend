@@ -54,4 +54,12 @@ type Mutation {
   login(email: String!, password: String!): User_SingleResponse!
   send_friend_request(_id: String!): User_SingleResponse!
   accept_friend_request(_id: String!): User_SingleResponse!
+  change_username(username: String!): User_SingleResponse!
+  delete_account: User_SingleResponse!
+  update_account(
+    username: String!
+    email: String!
+    password: String!
+  ): User_SingleResponse!
+  deactivate_account: User_SingleResponse!
 }

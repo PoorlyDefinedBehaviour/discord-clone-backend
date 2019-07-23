@@ -152,6 +152,320 @@ describe("user test suite", () => {
     expect(status).toBe(401);
   });
 
+  test("change username", async () => {
+    const { token }: any = await register_user(
+      faker.internet.userName(),
+      faker.internet.email(),
+      faker.internet.password()
+    );
+
+    const {
+      data: {
+        data: {
+          change_username: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          change_username(username: "${faker.internet.userName()}") {
+            status
+            errors {
+              path
+              message
+            }
+         }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    expect(status).toBe(201);
+  });
+
+  test("fail to change username without token", async () => {
+    const {
+      data: {
+        data: {
+          change_username: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          change_username(username: "${faker.internet.userName()}") {
+            status
+            errors {
+              path
+              message
+            }
+         }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${faker.internet.userName()}` }
+      }
+    );
+
+    expect(status).toBe(401);
+  });
+
+  test("delete account", async () => {
+    const { token }: any = await register_user(
+      faker.internet.userName(),
+      faker.internet.email(),
+      faker.internet.password()
+    );
+
+    const {
+      data: {
+        data: {
+          delete_account: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          delete_account {
+            status
+            errors {
+              path
+              message
+            }
+          }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    expect(status).toBe(201);
+  });
+
+  test("fail to delete account without token", async () => {
+    const {
+      data: {
+        data: {
+          delete_account: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          delete_account {
+            status
+            errors {
+              path
+              message
+            }
+          }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${faker.internet.userName()}` }
+      }
+    );
+
+    expect(status).toBe(401);
+  });
+
+  test("deactivate account", async () => {
+    const { token }: any = await register_user(
+      faker.internet.userName(),
+      faker.internet.email(),
+      faker.internet.password()
+    );
+
+    const {
+      data: {
+        data: {
+          deactivate_account: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          deactivate_account {
+            status
+            errors {
+              path
+              message
+            }
+          }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    expect(status).toBe(201);
+  });
+
+  test("update account", async () => {
+    const { token }: any = await register_user(
+      faker.internet.userName(),
+      faker.internet.email(),
+      faker.internet.password()
+    );
+
+    const {
+      data: {
+        data: {
+          update_account: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          update_account(username: "${faker.internet.userName()}",
+          email: "${faker.internet.email()}", 
+          password: "${faker.internet.password()}"
+          ) {
+            status
+            errors {
+              path
+              message
+            }
+          }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    expect(status).toBe(201);
+  });
+
+  test("fail to update account without token", async () => {
+    const {
+      data: {
+        data: {
+          update_account: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          update_account(username: "${faker.internet.userName()}",
+          email: "${faker.internet.email()}", 
+          password: "${faker.internet.password()}"
+          ) {
+            status
+            errors {
+              path
+              message
+            }
+          }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${faker.internet.userName()}` }
+      }
+    );
+
+    expect(status).toBe(401);
+  });
+
+  test("send friend request", async () => {
+    const { token: user_a_token }: any = await register_user(
+      faker.internet.userName(),
+      faker.internet.email(),
+      faker.internet.password()
+    );
+
+    const {
+      user: { _id: user_b_id }
+    }: any = await register_user(
+      faker.internet.userName(),
+      faker.internet.email(),
+      faker.internet.password()
+    );
+
+    const {
+      data: {
+        data: {
+          send_friend_request: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          send_friend_request(_id: "${user_b_id}") {
+            status
+          }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${user_a_token}` }
+      }
+    );
+
+    expect(status).toBe(200);
+  });
+
+  test("fail to send friend request without token", async () => {
+    const {
+      user: { _id }
+    }: any = await register_user(
+      faker.internet.userName(),
+      faker.internet.email(),
+      faker.internet.password()
+    );
+
+    const {
+      data: {
+        data: {
+          send_friend_request: { status }
+        }
+      }
+    }: any = await axios.post(
+      GraphQLEndPoint,
+      {
+        query: `
+        mutation {
+          send_friend_request(_id: "${_id}") {
+            status
+          }
+        }
+      `
+      },
+      {
+        headers: { Authorization: `Bearer ${faker.internet.userName()}` }
+      }
+    );
+
+    expect(status).toBe(401);
+  });
+
   test("query user by id", async () => {
     const { user: mock_user }: any = await register_user(
       faker.internet.userName(),

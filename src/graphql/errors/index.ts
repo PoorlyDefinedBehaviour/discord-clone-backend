@@ -18,6 +18,11 @@ export const UserNotFound = {
   message: "User not found"
 };
 
+export const UsernameNotValid = {
+  path: "name",
+  message: "Username must be at least 5 characters long"
+};
+
 export const FriendRequestAlreadySent = {
   path: "send_friend_request",
   message: "You've already sent a friend request to this user"
@@ -26,6 +31,16 @@ export const FriendRequestAlreadySent = {
 export const AlreadyFriend = {
   path: "accept_friend_request",
   message: "This user is in your friend list already"
+};
+
+export const AlreadyAServerMember = {
+  path: null,
+  message: "User is already a member of this server"
+};
+
+export const NotAServerMember = {
+  path: null,
+  message: "User is not a member of this server"
 };
 
 export const EmailAlreadyInUse = {

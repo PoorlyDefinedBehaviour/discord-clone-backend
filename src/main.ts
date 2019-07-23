@@ -52,7 +52,6 @@ async function main(): Promise<void> {
       socket.on(
         "message",
         (data: any): void => {
-
           socket
             .to(data.message.room)
             .emit("message", { message: data.message });

@@ -1,7 +1,7 @@
 import { verify } from "jsonwebtoken";
 import { Maybe } from "../../types/maybe";
 
-import { Request, Response, NextFunction } from "express";
+import { NextFunction } from "express";
 
 export const TokenDecoder = async (
   bearer_token: string
@@ -10,18 +10,20 @@ export const TokenDecoder = async (
     const token = bearer_token.split(" ")[1];
     return await verify(token, process.env.JWT_SECRET as string);
   } catch (e) {
-    return null;
+    console.log("auth", e);
+    return { _id: null };
   }
 };
 
 export const TokenValidator = async (
-  request: Request,
-  response: Response,
+  request: any,
+  _: any,
   next: NextFunction
 ) => {
   try {
-    (request as any).token_payload = await TokenDecoder(request.headers
+    request.token_payload = await TokenDecoder(request.headers
       .authorization as string);
+
     return next();
   } catch (e) {
     /**

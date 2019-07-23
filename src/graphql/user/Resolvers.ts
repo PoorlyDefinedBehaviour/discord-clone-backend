@@ -16,7 +16,7 @@ import {
   InvalidCredentials,
   TokenRequired,
   AlreadyFriend,
-  FriendRequestAlreadySent
+  UsernameNotValid
 } from "../errors";
 
 const RegisterSchema = yup.object().shape({
@@ -112,7 +112,7 @@ export default {
     },
     login: async (_: any, { email, password }: any) => {
       try {
-        const user: Maybe<IUser> = await User.findOne({ email }, Server)
+        let user: Maybe<IUser> = await User.findOne({ email }, Server)
           .populate("servers")
           .populate("friends")
           .populate("friend_requests")
@@ -125,11 +125,25 @@ export default {
 
         delete user.password;
 
+        if (!user.active) {
+          user = await User.findOneAndUpdate(
+            { _id: user._id },
+            { active: true },
+            {
+              new: true
+            }
+          ).exec();
+        }
+
         return {
           status: 200,
-          token: sign({ _id: user._id }, process.env.JWT_SECRET as string, {
-            expiresIn: "24h"
-          }),
+          token: sign(
+            { _id: (user as any)._id },
+            process.env.JWT_SECRET as string,
+            {
+              expiresIn: "24h"
+            }
+          ),
           user
         };
       } catch (error) {
@@ -146,32 +160,18 @@ export default {
 
       if (!user_id) return { status: 401, errors: [TokenRequired] };
 
-      const user: any = await User.findOne({ _id: user_id }, Server).catch(
-        (error: any) => ({
-          errors: [{ path: "test", message: "kfkfk" }]
-        })
-      );
-
-      if (!user) return { status: 404, errors: [UserNotFound] };
-
-      const friend: Maybe<IUser> = await User.findOne({ _id }, Server).catch(
+      const friend: any = await User.findOne({ _id }, Server).catch(
         (error: any) => null
       );
 
       if (!friend) return { status: 404, errors: [UserNotFound] };
 
-      const friend_request_sent: boolean = !!(friend as IUser).friend_requests.find(
-        (u: any) => u._id == user_id
-      );
+      if (!friend.friend_requests.includes(user_id)) {
+        friend.friend_requests.push(user_id);
+        await friend.save();
+      }
 
-      if (friend_request_sent)
-        return { status: 409, errors: [FriendRequestAlreadySent] };
-
-      (friend as IUser).friend_requests.push(user_id);
-
-      await (friend as IUser).save();
-
-      return { status: 200, user };
+      return { status: 200 };
     },
     accept_friend_request: async (
       _: any,
@@ -207,6 +207,96 @@ export default {
           .populate("friends friend_requests servers")
           .save()
       };
+    },
+    change_username: async (
+      _: any,
+      { username }: any,
+      { token_payload: { _id } }: any
+    ) => {
+      if (!_id) return { status: 401, errors: [InvalidUserId] };
+
+      if (username.split("").length < 5) {
+        return { status: 422, errors: [UsernameNotValid] };
+      }
+
+      try {
+        const user: any = await User.findOne({ _id }, Server).catch(
+          (error: any) => null
+        );
+
+        user.username = username;
+
+        await user.save();
+
+        return { status: 201, user };
+      } catch (e) {
+        return { status: 500, errors: [UserNotFound, InternalServerError] };
+      }
+    },
+    delete_account: async (
+      _: any,
+      __: any,
+      { token_payload: { _id } }: any
+    ) => {
+      if (!_id) return { status: 401, errors: [TokenRequired] };
+
+      try {
+        const user: any = await User.findOneAndDelete({ _id });
+
+        return { status: 201, user };
+      } catch (e) {
+        return { status: 500, errors: [UserNotFound, InternalServerError] };
+      }
+    },
+    deactivate_account: async (
+      _: any,
+      __: any,
+      { token_payload: { _id } }: any
+    ) => {
+      if (!_id) return { status: 401, errors: [TokenRequired] };
+
+      try {
+        const user: any = await User.findOneAndUpdate(
+          { _id },
+          { active: false },
+          {
+            new: true
+          }
+        ).exec();
+
+        return { status: 201, user };
+      } catch (e) {
+        return { status: 500, errors: [UserNotFound, InternalServerError] };
+      }
+    },
+    update_account: async (
+      _: any,
+      { username, email, password }: any,
+      { token_payload: { _id } }: any
+    ) => {
+      if (!_id) return { status: 401, errors: [TokenRequired] };
+
+      let update: any = {};
+
+      if (username) {
+        update.username = username;
+      }
+      if (email) {
+        update.email = email;
+      }
+      if (password) {
+        update.password = password;
+      }
+
+      try {
+        const user: any = await User.findOneAndUpdate({ _id }, update, {
+          new: true
+        }).exec();
+
+        return { status: 201, user };
+      } catch (e) {
+        return { status: 500, errors: [UserNotFound, InternalServerError] };
+      }
     }
   }
 };

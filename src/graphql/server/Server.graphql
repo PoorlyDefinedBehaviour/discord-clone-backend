@@ -45,4 +45,6 @@ type Query {
 
 type Mutation {
   create_server(name: String!): Server_SingleResponse
+  join_server(_id: String!): Server_SingleResponse
+  leave_server(_id: String!): Server_SingleResponse
 }
