@@ -45,16 +45,23 @@ async function main(): Promise<void> {
     "connection",
     (socket: any): void => {
       console.log(`${socket.id} connected`);
-      socket.emit("test", "testdata");
 
       socket.on("join", (room: string): void => socket.join(room));
 
       socket.on(
         "message",
-        (data: any): void => {
+        (data: any): void =>
           socket
             .to(data.message.room)
-            .emit("message", { message: data.message });
+            .emit("message", { message: data.message })
+      );
+
+      socket.on(
+        "voice",
+        (data: any): void => {
+          console.log("emitting to", data.data);
+
+          socket.to(data.data.room).emit("voice", data);
         }
       );
 

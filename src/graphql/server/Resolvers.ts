@@ -100,11 +100,13 @@ export default {
         if (!user_id) return { status: 401, errors: [TokenRequired] };
 
         const server: any = await Server.findOne({ _id }, User);
+
+        if (!server) return { stats: 404, errors: [ServerNotFound] };
+
         const user: any = await User.findOne({ _id: user_id }, Server);
 
-        if (server.members.includes(user._id)) {
+        if (server.members.includes(user._id))
           return { status: 409, errors: [AlreadyAServerMember] };
-        }
 
         server.members.push(user_id);
         user.servers.push(_id);
@@ -120,7 +122,7 @@ export default {
             .populate("members")
         };
       } catch (e) {
-        console.error(e);
+        console.error("join_server", e);
         return { status: 500, errors: [ServerNotFound, InternalServerError] };
       }
     },

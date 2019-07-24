@@ -297,6 +297,6 @@ export default {
       } catch (e) {
         return { status: 500, errors: [UserNotFound, InternalServerError] };
       }
-    }
+    },
   }
 };
