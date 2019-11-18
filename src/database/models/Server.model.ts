@@ -47,6 +47,7 @@ const ServerSchema = new Mongoose.Schema(
 );
 
 export interface IServer extends Mongoose.Document {
+  _id: string;
   owner: Mongoose.Types.ObjectId;
   name: string;
   logo: string;

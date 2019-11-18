@@ -1,0 +1,19 @@
+version: "3"
+services:
+  db:
+    restart: always
+    image: mongo
+    volumes:
+      - ./mongodata:/var/lib/mongodata/data
+    ports:
+      - "27017:27017"
+  app:
+    restart: always
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/app
+    depends_on:
+      - db
+    command: yarn start

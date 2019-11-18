@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import faker from "faker";
 import GraphQLEndPoint from "../GraphQLEndPoint";
-
 import { register_user } from "../user/User.test";
 
 describe("server test suite", () => {

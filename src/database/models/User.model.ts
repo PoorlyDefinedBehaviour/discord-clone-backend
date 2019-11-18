@@ -82,6 +82,7 @@ UserSchema.pre("save", async function(
 });
 
 export interface IUser extends Mongoose.Document {
+  _id: string;
   active: boolean;
   username: string;
   email: string;

@@ -6,10 +6,10 @@ export interface FormattedYupError {
   message: string;
 }
 
-export const FormatYupError = (
-  error: ValidationError
-): Array<FormattedYupError> =>
-  error.inner.map<any>((e: any) => ({
-    path: e.path,
-    message: e.message
+const format_yup_error = (error: ValidationError): Array<FormattedYupError> =>
+  error.inner.map<any>(({ path, message }) => ({
+    path,
+    message
   }));
+
+export default format_yup_error;

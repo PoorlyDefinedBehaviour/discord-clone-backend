@@ -8,7 +8,8 @@ Mongoose.connect(
     useCreateIndex: true,
     useNewUrlParser: true,
     keepAlive: true,
-    keepAliveInitialDelay: 30000
+    keepAliveInitialDelay: 30000,
+    useUnifiedTopology: true
   },
   (error: any): any => {
     if (error) {

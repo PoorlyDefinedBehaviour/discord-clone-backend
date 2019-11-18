@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import faker from "faker";
 import GraphQLEndPoint from "../GraphQLEndPoint";
 
@@ -6,7 +6,7 @@ export const register_user = async (
   username?: string,
   email?: string,
   password?: string
-): Promise<any> => {
+) => {
   username || (username = faker.internet.userName());
   email || (email = faker.internet.email());
   password || (password = faker.internet.password());
@@ -15,7 +15,7 @@ export const register_user = async (
     data: {
       data: { register }
     }
-  }: AxiosResponse<any> = await axios.post(GraphQLEndPoint, {
+  } = await axios.post(GraphQLEndPoint, {
     query: `
       mutation {
         register(username: "${username}",email: "${email}", password: "${password}") {
@@ -62,13 +62,13 @@ describe("user test suite", () => {
   });
 
   test("register a user", async () => {
-    const { status }: AxiosResponse<any> = await register_user();
+    const { status } = await register_user();
 
     expect(status).toBe(201);
   });
 
   test("invalid email", async () => {
-    const { status }: AxiosResponse<any> = await register_user(
+    const { status } = await register_user(
       faker.internet.userName(),
       "abc",
       faker.internet.password()
@@ -78,7 +78,7 @@ describe("user test suite", () => {
   });
 
   test("invalid password", async () => {
-    const { status }: AxiosResponse<any> = await register_user(
+    const { status } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       "12345"
@@ -89,7 +89,7 @@ describe("user test suite", () => {
 
   test("login", async () => {
     const mock_password = faker.internet.password();
-    const { user: mock_user }: any = await register_user(
+    const { user: mock_user } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       mock_password
@@ -101,7 +101,7 @@ describe("user test suite", () => {
           login: { status }
         }
       }
-    }: AxiosResponse<any> = await axios.post(GraphQLEndPoint, {
+    } = await axios.post(GraphQLEndPoint, {
       query: `
         mutation {
           login(email:"${mock_user.email}", password: "${mock_password}"){
@@ -115,7 +115,7 @@ describe("user test suite", () => {
   });
 
   test("fail to login with invalid credentials", async () => {
-    const { user: mock_user }: any = await register_user(
+    const { user: mock_user } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -127,7 +127,7 @@ describe("user test suite", () => {
           login: { status }
         }
       }
-    }: AxiosResponse<any> = await axios.post(GraphQLEndPoint, {
+    } = await axios.post(GraphQLEndPoint, {
       query: `
         mutation {
           login(email:"${
@@ -153,7 +153,7 @@ describe("user test suite", () => {
   });
 
   test("change username", async () => {
-    const { token }: any = await register_user(
+    const { token } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -165,7 +165,7 @@ describe("user test suite", () => {
           change_username: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -195,7 +195,7 @@ describe("user test suite", () => {
           change_username: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -219,7 +219,7 @@ describe("user test suite", () => {
   });
 
   test("delete account", async () => {
-    const { token }: any = await register_user(
+    const { token } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -231,7 +231,7 @@ describe("user test suite", () => {
           delete_account: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -261,7 +261,7 @@ describe("user test suite", () => {
           delete_account: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -285,7 +285,7 @@ describe("user test suite", () => {
   });
 
   test("deactivate account", async () => {
-    const { token }: any = await register_user(
+    const { token } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -297,7 +297,7 @@ describe("user test suite", () => {
           deactivate_account: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -321,7 +321,7 @@ describe("user test suite", () => {
   });
 
   test("update account", async () => {
-    const { token }: any = await register_user(
+    const { token } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -333,7 +333,7 @@ describe("user test suite", () => {
           update_account: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -366,7 +366,7 @@ describe("user test suite", () => {
           update_account: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -393,7 +393,7 @@ describe("user test suite", () => {
   });
 
   test("send friend request", async () => {
-    const { token: user_a_token }: any = await register_user(
+    const { token: user_a_token } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -401,7 +401,7 @@ describe("user test suite", () => {
 
     const {
       user: { _id: user_b_id }
-    }: any = await register_user(
+    } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -413,7 +413,7 @@ describe("user test suite", () => {
           send_friend_request: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -435,7 +435,7 @@ describe("user test suite", () => {
   test("fail to send friend request without token", async () => {
     const {
       user: { _id }
-    }: any = await register_user(
+    } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -447,7 +447,7 @@ describe("user test suite", () => {
           send_friend_request: { status }
         }
       }
-    }: any = await axios.post(
+    } = await axios.post(
       GraphQLEndPoint,
       {
         query: `
@@ -467,7 +467,7 @@ describe("user test suite", () => {
   });
 
   test("query user by id", async () => {
-    const { user: mock_user }: any = await register_user(
+    const { user: mock_user } = await register_user(
       faker.internet.userName(),
       faker.internet.email(),
       faker.internet.password()
@@ -479,7 +479,7 @@ describe("user test suite", () => {
           user: { user }
         }
       }
-    }: AxiosResponse<any> = await axios.post(GraphQLEndPoint, {
+    } = await axios.post(GraphQLEndPoint, {
       query: `
       {
         user(_id: "${mock_user._id}") {
@@ -510,7 +510,7 @@ describe("user test suite", () => {
       data: {
         data: { errors }
       }
-    }: any = await axios.post(GraphQLEndPoint, {
+    } = await axios.post(GraphQLEndPoint, {
       query: `
       {
         users(page: 0) {
