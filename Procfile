@@ -1,0 +1,1 @@
+worker: docker-compose up
