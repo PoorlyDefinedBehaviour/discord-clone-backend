@@ -6,7 +6,7 @@ type Dictionary<T> = {
 };
 
 export default class Chat implements Observable {
-  private observers: Dictionary<Observer[]>;
+  private observers: Dictionary<Observer[]> = {};
 
   public subscribe(room: string, observer: Observer): void {
     if (!this.observers[room]) {
