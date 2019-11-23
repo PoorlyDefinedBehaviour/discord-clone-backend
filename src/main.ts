@@ -35,23 +35,13 @@ async function main(): Promise<void> {
 
   io.on("connection", (socket) => {
     console.log(`${socket.id} connected`);
-    //chat.subscribe(new User(chat, socket));
 
-    //socket.on("join", (room: string) => socket.join(room));
-    socket.on("join", (room: string) => {
-      chat.subscribe(room, new User(chat, socket, room));
+    socket.on("join", (data) => {
+      chat.subscribe(data.server_id, new User(chat, socket, data));
     });
-    /* 
-    socket.on("message", (data) =>
-      socket.to(data.message.room).emit("message", { message: data.message })
-    ); */
-
-    /*   socket.on("voice", (data) =>
-      socket.to(data.data.room).emit("voice", data)
-    ); */
   });
 
-  await server.listen(process.env.PORT!).on("error", console.error);
+  await server.listen(process.env.PORT!);
 
   console.log(`Listening on PORT ${process.env.PORT}`);
 

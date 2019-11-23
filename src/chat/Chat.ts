@@ -6,27 +6,29 @@ type Dictionary<T> = {
 };
 
 export default class Chat implements Observable {
-  private observers: Dictionary<Observer[]> = {};
+  private observers: Dictionary<Set<Observer>> = {};
 
-  public subscribe(room: string, observer: Observer): void {
-    if (!this.observers[room]) {
-      this.observers[room] = [];
+  public subscribe(server_id: string, observer: Observer): void {
+    if (!this.observers[server_id]) {
+      this.observers[server_id] = new Set<Observer>();
     }
 
-    this.observers[room].push(observer);
+    this.observers[server_id].add(observer);
   }
 
-  public unsubscribe(room: string, observer: Observer): void {
-    this.observers[room] = this.observers[room].filter(
-      (obs) => obs !== observer
-    );
+  public unsubscribe(server_id: string, observer: Observer): void {
+    if (this.observers[server_id]) {
+      this.observers[server_id].delete(observer);
+    }
   }
 
-  public notify(room: string, data): void {
-    this.observers[room].forEach((observer) => observer.notify(data));
+  public notify(server_id: string, data): void {
+    if (this.observers[server_id]) {
+      this.observers[server_id].forEach((observer) => observer.notify(data));
+    }
   }
 
-  public send(room: string, data): void {
-    this.notify(room, data);
+  public send(data): void {
+    this.notify(data.message.server_id, data);
   }
 }
