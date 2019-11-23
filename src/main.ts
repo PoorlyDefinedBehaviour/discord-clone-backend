@@ -10,12 +10,17 @@ import token_validator from "./http/middlewares/TokenRequired.middleware";
 // @ts-ignore
 import Mongoose from "./database/MongoDB";
 import graphql_http from "./config/GraphQLHttp";
+import http from "http";
+import socketio from "socket.io";
+import Chat from "./chat/Chat";
+import User from "./chat/User";
 
 async function main(): Promise<void> {
   const app: Express = express();
 
-  const server = require("http").Server(app);
-  const io = require("socket.io").listen(server, { secure: false });
+  //const server = require("http").Server(app);
+  const server = http.createServer(app);
+  const io = socketio.listen(server);
 
   app.disable("X-Powered-By");
   app.use(morgan("combined"));
@@ -26,23 +31,27 @@ async function main(): Promise<void> {
   app.use(graphql_http);
   app.use(global_exception_handler);
 
-  io.on("connection", (socket: any): void => {
+  const chat = new Chat();
+
+  io.on("connection", (socket) => {
     console.log(`${socket.id} connected`);
+    //chat.subscribe(new User(chat, socket));
 
-    socket.on("join", (room: string): void => socket.join(room));
-
-    socket.on("message", (data: any): void =>
+    //socket.on("join", (room: string) => socket.join(room));
+    socket.on("join", (room: string) => {
+      chat.subscribe(room, new User(chat, socket, room));
+    });
+    /* 
+    socket.on("message", (data) =>
       socket.to(data.message.room).emit("message", { message: data.message })
-    );
+    ); */
 
-    socket.on("voice", (data: any): void =>
+    /*   socket.on("voice", (data) =>
       socket.to(data.data.room).emit("voice", data)
-    );
+    ); */
   });
 
-  server
-    .listen(process.env.PORT!, process.env.HOST || "0.0.0.0")
-    .on("error", console.error);
+  await server.listen(process.env.PORT!).on("error", console.error);
 
   console.log(`Listening on PORT ${process.env.PORT}`);
 
